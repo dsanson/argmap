@@ -1,0 +1,583 @@
+#!/usr/bin/env lua
+
+local pl = require'pl.import_into'()
+local lyaml   = require "lyaml"
+local json = require 'json'
+
+-- initialize the output map
+local output = { ["ideas"] = {}}
+-- initialize a global counter for providing unique ids
+local gn = 0
+
+-- default options
+local gdrive_id = nil
+local name = nil
+local upload = false
+local public = "" 
+
+-- a long string containing all the styling needed for argument maps
+local template = lyaml.load([=[
+---
+formatVersion: 3
+id: root
+attr:
+  theme: argMappingSimple
+theme:
+  name: 'MindMup Top Down Argument Mapping'
+  connectorEditingContext:
+    name: argument-mapping
+    allowed:
+      - width
+      - label
+    defaults:
+      width: 3
+  blockThemeOverrides: true
+  layout:
+    orientation: top-down
+    spacing:
+      h: 20
+      v: 60
+  node:
+    -
+      name: default
+      cornerRadius: 5
+      backgroundColor: '#ffffff'
+      border:
+        type: surround
+        line:
+          color: '#707070'
+          width: 1
+      shadow:
+        -
+          color: '#070707'
+          opacity: 0.3
+          offset:
+            width: 2
+            height: 2
+          radius: 2
+      text:
+        margin: 5
+        alignment: start
+        maxWidth: 146
+        color: '#4F4F4F'
+        lightColor: '#EEEEEE'
+        darkColor: '#000000'
+        font:
+          lineSpacing: 2
+          lineSpacingPx: 2.6
+          size: 10
+          sizePx: 13.3
+          weight: light
+      connections:
+        default:
+          h: center-separated
+          v: base
+        from:
+          horizontal:
+            h: center-separated
+            v: base
+        to:
+          h: center
+          v: top
+      decorations:
+        height: 16
+        edge: top
+        overlap: true
+        position: end
+    -
+      name: attr_implicit_claim
+      border:
+        type: surround
+        line:
+          color: '#707070'
+          width: 1
+          style: dashed
+    -
+      name: activated
+      border:
+        type: surround
+        line:
+          color: '#22AAE0'
+          width: 3
+          style: dotted
+    -
+      name: activated.attr_implicit_claim
+      border:
+        type: surround
+        line:
+          color: '#22AAE0'
+          width: 3
+          style: dashed
+    -
+      name: selected
+      shadow:
+        -
+          color: '#000000'
+          opacity: 0.9
+          offset:
+            width: 2
+            height: 2
+          radius: 2
+    -
+      name: collapsed
+      shadow:
+        -
+          color: '#888888'
+          offset:
+            width: 0
+            height: 1
+          radius: 0
+        -
+          color: '#FFFFFF'
+          offset:
+            width: 0
+            height: 3
+          radius: 0
+        -
+          color: '#888888'
+          offset:
+            width: 0
+            height: 4
+          radius: 0
+        -
+          color: '#FFFFFF'
+          offset:
+            width: 0
+            height: 6
+          radius: 0
+        -
+          color: '#888888'
+          offset:
+            width: 0
+            height: 7
+          radius: 0
+    -
+      name: collapsed.selected
+      shadow:
+        -
+          color: '#FFFFFF'
+          offset:
+            width: 0
+            height: 1
+          radius: 0
+        -
+          color: '#888888'
+          offset:
+            width: 0
+            height: 3
+          radius: 0
+        -
+          color: '#FFFFFF'
+          offset:
+            width: 0
+            height: 6
+          radius: 0
+        -
+          color: '#555555'
+          offset:
+            width: 0
+            height: 7
+          radius: 0
+        -
+          color: '#FFFFFF'
+          offset:
+            width: 0
+            height: 10
+          radius: 0
+        -
+          color: '#333333'
+          offset:
+            width: 0
+            height: 11
+          radius: 0
+    -
+      name: attr_group
+      cornerRadius: 10
+      backgroundColor: transparent
+      border:
+        type: overline
+      shadow:
+        -
+          color: transparent
+      text:
+        margin: 0
+        alignment: center
+        color: '#4F4F4F'
+        lightColor: '#EEEEEE'
+        darkColor: '#000000'
+        font:
+          lineSpacing: 2.5
+          lineSpacingPx: 3.25
+          size: 9
+          sizePx: 12
+          weight: bold
+      connections:
+        style: supporting-group
+        childstyle: no-connector
+        default:
+          h: center
+          v: base
+        from:
+          below:
+            h: center
+            v: base
+        to:
+          h: center
+          v: top
+    -
+      name: attr_group_supporting
+      connections:
+        style: supporting-group
+        childstyle: no-connector
+        default:
+          h: center
+          v: base
+        from:
+          below:
+            h: center
+            v: base
+        to:
+          h: center
+          v: top
+    -
+      name: attr_group_supporting.level_1
+      backgroundColor: 'rgba(0, 255, 0, 0.2)'
+      border:
+        type: surround
+        line:
+          color: transparent
+          width: 2
+          style: solid
+    -
+      name: attr_group_supporting.activated
+      backgroundColor: 'rgba(0, 255, 0, 0.2)'
+      border:
+        type: surround
+        line:
+          color: '#00FF00'
+          width: 3
+          style: dotted
+    -
+      name: attr_group_opposing
+      connections:
+        style: opposing-group
+        childstyle: no-connector
+        default:
+          h: center
+          v: base
+        from:
+          below:
+            h: center
+            v: base
+        to:
+          h: center
+          v: top
+    -
+      name: attr_group_opposing.level_1
+      backgroundColor: 'rgba(255, 0, 0, 0.2)'
+      border:
+        type: surround
+        line:
+          color: transparent
+          width: 2
+          style: solid
+    -
+      name: attr_group_opposing.activated
+      backgroundColor: 'rgba(255, 0, 0, 0.2)'
+      border:
+        type: surround
+        line:
+          color: '#FF0000'
+          width: 3
+          style: dotted
+    -
+      name: attr_group_supporting.droppable
+      backgroundColor: 'rgba(0, 255, 0, 0.6)'
+      border:
+        type: surround
+        line:
+          color: '#00FF00'
+          width: 3
+          style: dashed
+    -
+      name: attr_group_opposing.droppable
+      backgroundColor: 'rgba(255, 0, 0, 0.6)'
+      border:
+        type: surround
+        line:
+          color: '#FF0000'
+          width: 3
+          style: dashed
+  connector:
+    default:
+      type: vertical-quadratic-s-curve
+      line:
+        color: '#707070'
+        width: 1
+      label:
+        position:
+          aboveEnd: 15
+          ratio: 0.8
+        backgroundColor: white
+        borderColor: white
+        text:
+          color: '#4F4F4F'
+          font:
+            size: 9
+            sizePx: 12
+            weight: normal
+    no-connector:
+      type: no-connector
+      line:
+        color: '#707070'
+        width: 0
+    supporting-group:
+      type: vertical-quadratic-s-curve
+      line:
+        color: '#339966'
+        width: 3
+      label:
+        position:
+          aboveEnd: 15
+          ratio: 0.8
+        backgroundColor: white
+        borderColor: white
+        text:
+          color: '#339966'
+          font:
+            size: 9
+            sizePx: 12
+            weight: normal
+    opposing-group:
+      type: vertical-quadratic-s-curve
+      line:
+        color: '#FF0000'
+        width: 3
+      label:
+        position:
+          aboveEnd: 15
+          ratio: 0.8
+        backgroundColor: white
+        borderColor: white
+        text:
+          color: '#FF0000'
+          font:
+            size: 9
+            sizePx: 12
+            weight: normal
+    no-connector.supporting-group:
+      type: no-connector
+      line:
+        color: '#339966'
+        width: 4
+      label:
+        position:
+          ratio: 0.5
+        backgroundColor: transparent
+        borderColor: transparent
+        text:
+          color: '#339966'
+          font:
+            size: 6
+            sizePx: 9
+            weight: normal
+    no-connector.opposing-group:
+      type: no-connector
+      line:
+        color: '#FF0000'
+        width: 4
+      label:
+        position:
+          ratio: 0.5
+        backgroundColor: transparent
+        borderColor: transparent
+        text:
+          color: '#4F4F4F'
+          font:
+            size: 6
+            sizePx: 9gg
+            weight: normal
+...
+]=])
+
+function pipe_in_out(cmd, s)
+    -- a function for piping through unix commands
+    local tmp = os.tmpname()
+    local tmpout = os.tmpname()
+    local f = io.open(tmp, 'w')
+    f:write(s)
+    f:close()
+    local fout = assert(io.popen(cmd .. " " .. tmp)) 
+    local o = fout:read("*all")
+    fout:close()
+    os.remove(tmp)
+    os.remove(tmpout)
+    return o
+end
+
+function markdown_to_plain(s)
+    return pipe_in_out("pandoc --wrap=none -t plain -f markdown", s) 
+end
+
+function parse_ideas(t)
+    -- initialize the output table
+    local o = {}
+    -- initialize a local counter for ids
+    local n = 0
+    for i,v in pairs(t) do
+        if not string.match(i, "^label$") and not string.match(i, "^strength$") then
+            -- manage counters
+            n = n + 1
+            gn = gn + 1
+            local id = tostring(n)
+            local gid = tostring(gn)
+            -- the key is the claim
+            local claim = i
+            -- if we haven't set a name for our map yet, use the claim as the name.
+            if not name then
+                name = claim
+            end
+            local attr = {}
+            -- claims that begin with a '-' are styled as implicit premises
+            if string.match(claim,"^-.*") then
+                claim = string.sub(claim,2,-1)
+                attr = { 
+                    ["styleNames"] = { "attr_implicit_claim" } 
+                }
+            end
+            claim = markdown_to_plain(claim)
+            local note = parse_notes(v) 
+            if note then
+                gn = gn + 1
+                attr["note"] = {
+                    ["index"] = gn,
+                    ["text"] = note
+                }
+            end
+            o[id] = { 
+                ["title"] = claim, 
+                ["id"] = gid, 
+                ["attr"] = attr, 
+                ["ideas"] = parse_reasons(v) 
+            }
+        end
+    end
+    return o
+end
+
+function parse_notes(t)
+    for i,v in pairs(t) do
+        if string.match(i, "^note$") then
+            return markdown_to_plain(v)
+        end
+    end
+    return nil
+end
+
+function parse_special(t,s)
+    for i,v in pairs(t) do
+        if string.match(i, "^" .. s .. "$") then
+            return v
+        end
+    end
+    return nil
+end
+
+function parse_reasons(t)
+    local o = {}
+    local n = 0
+    for i,v in pairs(t) do
+        if not string.match(i, "^note$") then
+            n = n + 1
+            gn = gn + 1
+            local id = tostring(n)
+            local gid = tostring(gn)
+            local group = "supporting"
+            if string.match(i, "^[-o].*") then
+                group = "opposing"
+            end
+            local label = parse_special(v,"label")
+            local strength = parse_special(v,"strength")
+            local ideas = parse_ideas(v)
+            local attr = { ["contentLocked"] = "true", 
+                           ["group"] = group, 
+                           ["parentConnector"] = { ["width"] = strength, ["label"] = label }
+                       }
+            o[id] = { ["title"] = "group", ["id"] = gid, ["attr"] = attr, ["ideas"] = ideas }
+        end
+    end
+    return o
+end
+
+-- main program
+
+-- parse cli options
+
+local flags,args = pl.app.parse_args(args,{g=true, gdrive_id=true, n=true, name=true })
+
+upload = flags["u"] or flags["upload"] or flags["p"] or flags["public"] or flags["g"] or flags["gdrive"]
+if flags["g"] then
+    gdrive_id = flags["g"]
+end
+if flags["gdrive_id"] then
+    gdrive_id = flags["gdrive_id"]
+end
+if flags["n"] then
+    name = flags["n"]
+end
+if flags["name"] then
+    name = flags["name"]
+end
+if flags["p"] then
+    public = "--share"
+end
+if flags["public"] then
+    public = "--share"
+end
+if flags["h"] or flags["help"] then
+    output = [[
+argmap2mup <options>
+   -u, --upload           :  upload to Google Drive
+   -g ID, --gdrive_id ID  :  update file with ID on Google Drive
+   -p, --public           :  mark uploaded file as public
+   -n NAME, --name NAME   :  set the name of the map to NAME        
+   -h, --help]]
+else
+    local yaml = ""
+    -- if #args > 0 then
+    --     -- read files from command line args
+    --     for i,n in ipairs(args) do
+    --         local f = io.open(n,'r')
+    --         yaml = yaml .. f:read("*all")
+    --         f:close()
+    --     end
+    -- else
+       -- read in stdin and parse yaml to lua table
+    yaml = io.read("*all")
+    -- end
+    local input = lyaml.load(yaml)
+
+    output = template
+
+    output["ideas"] = parse_ideas(input)
+    --pl.pretty.dump(output)
+    output["title"] = name
+
+    local mup = json.encode(output)
+
+    if upload and gdrive_id then
+        pipe_in_out("gdrive update " .. " --no-progress --name \"" .. name .. "\" --mime \"application/vnd.mindmup\" \"" .. gdrive_id .. "\"", mup)
+        output = gdrive_id
+    elseif upload then
+        gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
+        -- gdrive_id = pipe_in_out("gdrive upload --delete --share --no-progress -p " .. gdriveFolder ..
+        --                " --name " .. name .. " --mime \"application/vnd.mindmup\"", mup)
+        local gdriveoutput = pipe_in_out("gdrive upload --delete " .. public .. " --no-progress -p \"" .. gdriveFolder ..
+                        "\" --name \"" .. name .. "\" --mime \"application/vnd.mindmup\"",mup)
+        gdrive_id = string.match(gdriveoutput, "Uploaded ([^%s]*) at")
+        output = gdrive_id
+    else
+        output = mup
+    end
+end
+print(output)

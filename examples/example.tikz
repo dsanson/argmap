@@ -1,0 +1,53 @@
+\begin{tikzpicture}
+  [
+    umbrella/.style args={#1}{
+        draw=none,
+        rectangle,
+        append after command={
+            \pgfextra{%
+                \pgfkeysgetvalue{/pgf/outer xsep}{\oxsep}
+                \pgfkeysgetvalue{/pgf/outer ysep}{\oysep}
+                \begin{pgfinterruptpath}
+                    \ifx\\#1\\\else
+                        \draw[draw,#1] 
+                        ([xshift=-\pgflinewidth,yshift=-2mm]\tikzlastnode.north east) 
+                        -- ([xshift=-\pgflinewidth,yshift=-\oysep]\tikzlastnode.north east) 
+                        -- ([xshift=0,yshift=-\oysep]\tikzlastnode.north west) 
+                        -- ([xshift=0,yshift=-2mm]\tikzlastnode.north west);
+                    \fi
+                \end{pgfinterruptpath}
+            }
+        }
+    },
+    claim/.style={draw, black, very thin,
+       execute at begin node={\begin{varwidth}{\argmapmaxnodewidth}},
+       execute at end node={\end{varwidth}}
+    },
+    supporting/.style={umbrella={green,very thick}},
+    supportingedge/.style={green,very thick},
+    opposing/.style={umbrella={red, very thick}},
+    opposingedge/.style={red,very thick},
+    implicit/.style={dashed}
+  ]
+  \pgfsetcornersarced{\pgfpoint{.5mm}{.5mm}}  \graph [layered layout, grow=down, tail anchor=center, head anchor=center]
+  {
+    c1/"Brunellus is irrational
+"[claim]
+      --[opposingedge]
+      r2/"" [opposing] // [ tree layout ] {
+        c3/"Brunellus studied in Paris.
+"[claim],
+        c4/"Most who study in Paris are rational.
+"[claim, implicit],
+      },
+    c1/"Brunellus is irrational
+"[claim]
+      --[supportingedge]
+      r5/"" [supporting] // [ tree layout ] {
+        c6/"Brunellus is a donkey.
+"[claim],
+        c7/"All donkeys are irrational.
+"[claim],
+      },
+  };
+\end{tikzpicture}
