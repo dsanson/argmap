@@ -63,7 +63,7 @@ repository. Here are some things to try:
 `$ cat example.yml | argmap2mup > example.mup`: generate a MindMup map
 from example.yml. Import that map into MindMup to work with.
 
-`$ cat example.yml | argmap2mup -u`: generate a MindMup map and upload it to
+`$ argmap2mup -u example-2.yml`: generate a MindMup map and upload it to
 your Google Drive. You can then go to Google Drive and open the map in MindMup
 to work with it.
 
@@ -73,7 +73,7 @@ download it as a MindMup file (File → Download As → MindMup). Now convert it
 to `YAML`:
 
 ```{.sh}
-cat download.mup | mup2argmap`
+mup2argmap download.mup`
 ```
 
 Next, try generating a PDF image from `example.yml`:
@@ -262,6 +262,9 @@ MindMup offers very limited support for formatted text.
 
 ### Notes, Labels, and Strength
 
+(Currently, notes, labels, and strength are only supported for MindMup input
+and output, and do not appear in TikZ output.)
+
 You can attach one *note* to any claim 
 (if you attach more than one note,
 only one of them will be processed).
@@ -284,8 +287,6 @@ Brunellus is irrational:
 ``` 
 
 Notes are also processed by `pandoc`, allowing the use of simple markdown.
-Currently, notes are only supported for MindMup output, and will not appear in
-TikZ output.
 
 You can attach a *label* or *strength* to any reason.
 A label is a key-value pair,
@@ -311,8 +312,8 @@ Brunellus is irrational:
 ## `argmap2mup`
 
 `argmap2mup` is a pipe for converting `YAML` maps to `JSON`
-encoded MindMup maps. (Here I use [`jq`](https://stedolan.github.io/jq/) to
-pretty-print the `JSON` output.)
+encoded MindMup maps. It takes as its input the first cli argument that is not
+an option, or, if there is no such argument, STDIN.
 
 ```{.sh}
 $ cat example.yml | argmap2mup | jq
@@ -326,6 +327,9 @@ $ cat example.yml | argmap2mup | jq
 }
 ```
 
+(Here I've used [`jq`](https://stedolan.github.io/jq/) to
+pretty-print the `JSON` output.)
+
 The following options are available:
 
 `-u, --upload`: Upload to Google Drive.
@@ -334,7 +338,7 @@ If this option is selected, then, instead of dumping the map to STDOUT, it is up
 its Google Drive ID is returned. 
 
 ```{.sh}
-$  cat example.yml | argmap2mup -u
+$  argmap2mup -u example.yml
 1e4HAl1iHPKBiKZ_BI_yBw7rXYbuvMsC2
 ```
 
@@ -379,18 +383,30 @@ no doubt you can break things by specifying weird things as the name.
 ## `mup2argmap`
 
 `mup2argmap` is a pipe for converting MindMup maps into the argmap `YAML`
-format:
+format. It takes as its input the first cli argument that is not
+an option, or, if there is no such argument, STDIN.
 
 ```{.sh}
 cat example.mup | mup2argmap
+mup2argmap example.mup
 ```
 
-`mup2argmap` currently accepts no options.
+The following options are available:
+
+`-g ID, --gdrive_id ID`: read the file by Google Drive ID.
+
+This option overrides all other forms of input.
+
+`-e, --embed`: wrap output in a pandoc markdown code block with attributes,
+suitable for embedding.
+
+`-h, --help`: Display a brief synopsis of these options.
 
 ## `argmap2tikz`
 
 `argmap2tikz` is a pipe for converting `YAML` maps to TikZ pictures,
-suitable for embedding in `LaTeX`. 
+suitable for embedding in `LaTeX`. It takes as its input the first cli argument that is not
+an option, or, if there is no such argument, STDIN.
 
 ```{.sh}
 $ cat example.yml | argmap2tikz
@@ -417,7 +433,7 @@ The following options are available:
 `-s, --standalone`: generate a standalone LaTeX file.
 
 ```{.sh}
-$ cat example.yml | argmap2tikz -s
+$ argmap2tikz -s example.yml
 \documentclass[tikz]{standalone}
     \usepackage{tikz}
     \usetikzlibrary{graphs,graphdrawing}
@@ -434,7 +450,7 @@ which can then be used as is or converted into other formats using other
 tools, e.g.,
 
 ```{.sh}
-$ cat example.yml | argmap2tikz -s > example.tex
+$ argmap2tikz -s example.yml > example.tex
 $ lualatex example
 $ convert example.pdf example.png
 ```
@@ -596,11 +612,12 @@ paragraph containing the generated image, linked to the mindmup file.
 -   [] add sane syntax checking: right now, if you mess up the syntax of your
     map, everything breaks.
 -   [] improve the tikz styling of maps.
+    -   [] support for notes, labels, and strength in tikz output
     -   [] the green and red "umbrellas" should only be as wide as the claim
         boxes immediately beneath them.
     -   [] the green and red edges should be curved.
 -   [] support for other formats?
 -   [] merge the three pipes into a single `argmap` command, using cli options
     to select input and output formats
--   [] mup2argmap should support fetching mup files from Google Drive and 
+-   [x] mup2argmap should support fetching mup files from Google Drive and 
     offer embeddable output (i.e., code block with both name and gid attributes)
