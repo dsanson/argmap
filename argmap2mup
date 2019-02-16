@@ -437,7 +437,7 @@ function parse_special(t,s)
     return nil
 end
 
-function parse_ideas(t)
+function parse_claims(t)
     -- initialize the output table
     local o = {}
     -- initialize a local counter for ids
@@ -499,7 +499,7 @@ function parse_reasons(t)
             end
             local label = parse_special(v,"label")
             local strength = parse_special(v,"strength")
-            local ideas = parse_ideas(v)
+            local ideas = parse_claims(v)
             local attr = { ["contentLocked"] = "true", 
                            ["group"] = group, 
                            ["parentConnector"] = { ["width"] = strength, ["label"] = label }
@@ -566,7 +566,7 @@ function main()
         end 
         local argmap = lyaml.load(input)
         output = template
-        output["ideas"] = parse_ideas(argmap)
+        output["ideas"] = parse_claims(argmap)
         output["title"] = name
         local mup = json.encode(output)
 
