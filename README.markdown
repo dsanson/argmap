@@ -3,7 +3,7 @@
 [![](examples/2cc90b7c54f340b9e4589f2c1b5a26589a5f2653.png)](https://drive.mindmup.com/map/18asUocP9fUtPbA8h4-qtTTfem0bxGunB)
 
 This repository contains some tools for working with argument maps written in
-a relatively simple `YAML` format. For example, the map above was generated
+a relatively simple [`YAML`](https://yaml.org/) format, described below. For example, the map above was generated
 from this `YAML`:
 
 ```{.yaml}
@@ -16,19 +16,19 @@ from this `YAML`:
     "-Most who study in Paris are rational.":
 ```
 
-The map above is also a hyperlink: click on it to open an version of
+The map above is also a hyper-link: click on it to open an version of
 the map in [Mindmup's Argument Visualization
 Mode](https://www.mindmup.com/tutorials/argument-visualization.html).
 
 ## Installation
 
-Place `argmap2mup` and `argmap2tikz` somewhere in your path. Place
+Place `argmap2mup`, `argmap2tikz`, and `mup2argmap` somewhere in your path. Place
 `pandoc-argmap.lua` in the `filters` folder inside your pandoc data directory,
 e.g., `$HOME/.pandoc/filters/pandoc-argmap.lua`.
 
 ## Dependencies
 
-`argmap2mup` and `argmap2tikz` require
+`argmap2mup`, `argmap2tikz`, and `mup2argmap` require
 [penlight](https://github.com/stevedonovan/Penlight) (for command line option
 parsing), 
 , [lyaml](https://github.com/gvvaughan/lyaml) (for parsing `YAML`), and
@@ -67,6 +67,15 @@ from example.yml. Import that map into MindMup to work with.
 your Google Drive. You can then go to Google Drive and open the map in MindMup
 to work with it.
 
+[Create an argument map on
+Mindmup](https://www.mindmup.com/tutorials/argument-visualization.html) and
+download it as a MindMup file (File → Download As → MindMup). Now convert it
+to `YAML`:
+
+```{.sh}
+cat download.mup | mup2argmap`
+```
+
 Next, try generating a PDF image from `example.yml`:
 
 ```{.sh}
@@ -81,25 +90,126 @@ embedded argument map:
 $ pandoc example.md -o example.html --lua-filter pandoc-argmap.lua
 ```
 
-## The YAML Format
+## Argument Maps in YAML
 
-A basic map consists of *claims* and *reasons*.
-Each claim is represented as a key-value pair:
-the key is the content of the claim;
-the value is a (possibly empty) list of reasons.
-Each reason is represented as a key-value pair:
-the key is any unique identifier;
-the value is a (possibly empty) list of claims.
-A reason whose key begins with an `o` or a `-` instead represents an *objection*.
-All other reasons are *supporting reasons*.
-A claim whose key begins with a `-` is an implicit claim.
+The goal here is to describe a spec for argument maps that
+is relatively easy for humans to read and write.
+
+An argument map consists of *claims* and *reasons*: each claim can be
+supported by zero or more reasons; each reason consists of zero or more
+claims.
+
+We represent each *claim* as a key-value pair:
+
+-   the key is the content of the claim;
+-   the value is a (possibly empty) list of reasons.
+
+So here is how we represent the claim that Brunellus is irrational unsupported
+by any reasons:
+
+```{.yaml}
+"Brunellus is irrational": {}
+```
+
+We also represent each *reason* as a key-value pair:
+
+-   the key is an identifier;
+-   the value is a (possibly empty) list of claims.
+
+For example, here is a reason that consists of two claims:
+
+```{.yaml}
+  reason1:
+    "Brunellus is a donkey.": {}
+    "All donkeys are irrational.": {} 
+```
+
+There are two kinds of reasons: *supporting reasons* and reasons against (i.e.,
+*objections*). We use the identifier to represent this difference:
+
+-   a reason whose key begins with an `o` or `-` is an objection;
+-   all other reasons are supporting reasons.
+
+So that takes us back to our original example:
+
+```{.yaml}
+"Brunellus is irrational":
+  r1:
+    "Brunellus is a donkey.": {}
+    "All donkeys are irrational.": {}
+  o1:
+    "Brunellus studied in Paris.": {}
+    "-Most who study in Paris are rational.": {}
+```
+
+Note the '`-`' before "Most who study..".
+Claims are either *explicit* or *implicit*.
+We use the key to represent this:
+
+-   a claim whose key begins with a `-` is implicit;
+-   all other claims are explicit.
+
+We also include a way to attach a single note to each claim, and a way to
+label reasons and specify their relative strength.
+
+### Unique Identifiers
+
+Note that the reasons for a given claim cannot share the same identifier.
+Something like this will lead to unpredictable behavior: 
+
+```{.yaml}
+"Brunellus is irrational":
+  reason: {}
+  reason: {}
+```
+
+The resulting map will only display a single reason, and which one it will
+choose in unpredictable.
+
+Instead, you need to ensure that the keys are distinct:
+
+```{.yaml}
+"Brunellus is a donkey":
+  reason1: {}
+"All donkeys are irrational":
+  reason1: {}
+```
+
+Reasons for distinct claims can have the same identifier. So this is okay:
+
+```{.yaml}
+"Brunellus is irrational": 
+  reason1: {}
+"Brunellus
+  reason1: {}
+```
+
+The same holds for claims: each of the claims that make up a given reason
+must have distinct keys. So don't write something like this:
+
+```{.yaml}
+"Brunellus is irrational":
+  r1:
+    "Brunellus is a donkey.": {}
+    "Brunellus is a donkey.": {}
+```
+
+Since the key is the content of the claim, this restriction makes
+sense.
 
 ### Empty Lists 
 
 Note that every claim is represented as key-value pair, where the value is a
 list of reasons. If there are no reasons offered for or against a claim, that
-means that the value is an empty list. So the colon ('`:`') at then end of
-each premise is required, e.g.,:
+means that the value is an empty list. You can represent this empty list
+explicitly if you like:
+
+```{.yaml}
+    "Brunellus is a donkey.": {}
+```
+
+Or you can leave it implicit, omitting the '`{}`'. But you still *must* put the
+colon ('`:`') after the claim:
 
 ```{.yaml}
     "Brunellus is a donkey.": 
@@ -261,6 +371,17 @@ No sanity checks are performed on this:
 no doubt you can break things by specifying weird things as the name.
 
 `-h, --help`: Display a brief synopsis of these options.
+
+## `mup2argmap`
+
+`mup2argmap` is a pipe for converting MindMup maps into the argmap `YAML`
+format:
+
+```{.sh}
+cat example.mup | mup2argmap
+```
+
+`mup2argmap` currently accepts no options.
 
 ## `argmap2tikz`
 
