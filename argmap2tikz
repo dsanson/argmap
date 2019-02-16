@@ -185,7 +185,7 @@ function parse_reasons(t,claimline)
                 --     }
                 -- note the recursive call to parse_claims.
                 o = o .. claimline .. "\n" .. 
-                    string.rep(" ",indent) .. "--[" .. width .. ", " .. label .. type .. "edge] " ..
+                    string.rep(" ",indent) .. "--[" .. width .. ", " .. labelnode .. type .. "edge] " ..
                     string.rep(" ",indent) .. "r" .. gid .. "/\"\" [" .. type .. "={" .. width .. "}] // [ tree layout ] {\n"
                     .. parse_claims(v)
                     .. string.rep(" ",indent) .. "},\n"
