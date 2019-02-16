@@ -76,7 +76,7 @@ download it as a MindMup file (File → Download As → MindMup). Now convert it
 to `YAML`:
 
 ``` {.sh}
-mup2argmap download.mup`
+mup2argmap download.mup > download.yml
 ```
 
 Next, try generating a PDF image from `example.yml`:
@@ -97,9 +97,11 @@ Argument Maps in YAML
 ---------------------
 
 The goal here is to describe a spec for argument maps that is relatively easy
-for humans to read and write.
+for humans to read and write. The spec we use is much less ambitious than
+other specs that I know of, like [Argdown](https://argdown.org/) and the
+[Argument Interchange Format](http://www.argumentinterchange.org/).
 
-An argument map consists of *claims* and *reasons*: each claim can be
+For our purposes, an argument map consists of *claims* and *reasons*: each claim can be
 supported by zero or more reasons; each reason consists of zero or more
 claims.
 
