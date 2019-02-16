@@ -593,6 +593,8 @@ paragraph containing the generated image, linked to the mindmup file.
 
 ## TODO
 
+-   [] add sane syntax checking: right now, if you mess up the syntax of your
+    map, everything breaks.
 -   [] improve the tikz styling of maps.
     -   [] the green and red "umbrellas" should only be as wide as the claim
         boxes immediately beneath them.
@@ -602,7 +604,3 @@ paragraph containing the generated image, linked to the mindmup file.
     to select input and output formats
 -   [] mup2argmap should support fetching mup files from Google Drive and 
     offer embeddable output (i.e., code block with both name and gid attributes)
-
-
-
-
