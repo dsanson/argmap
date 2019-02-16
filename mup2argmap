@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 -- A pipe that reads mindmup `mup` files and outputs `yaml` argument maps.
 
-local pl = require'pl.import_into'()
+--local pl = require'pl.import_into'()
 local lyaml   = require "lyaml"
 local json = require 'json'
 
@@ -68,10 +68,10 @@ function parse_reasons(reasons,note)
     return argmap
 end
 
-function parse_options(a)
-    local flags,args = pl.app.parse_args(a)
-    return flags,args
-end
+-- function parse_options(a)
+--     local flags,args = pl.app.parse_args(a)
+--     return flags,args
+-- end
 
 function main_program()
     -- local flags,args = parse_options
