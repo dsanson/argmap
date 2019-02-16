@@ -6,7 +6,7 @@ local format = FORMAT
 local identifier = "argmap"
 
 -- set this to the google ID of the default folder to upload to
--- local gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
+local gdriveFolder = nil
 
 local function trim(s)
    return (s:gsub("\n",""))
