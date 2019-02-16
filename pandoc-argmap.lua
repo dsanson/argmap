@@ -5,6 +5,9 @@ local format = FORMAT
 -- class that identifies a code block as an argument map
 local identifier = "argmap"
 
+-- set this to the google ID of the default folder to upload to
+-- local gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
+
 local function trim(s)
    return (s:gsub("\n",""))
 end
@@ -101,6 +104,10 @@ function CodeBlock(block)
         if gid then
             argmap2mup_opts[#argmap2mup_opts + 1] = "-g"
             argmap2mup_opts[#argmap2mup_opts + 1] = gid
+        end
+        if gdriveFolder then
+            argmap2mup_opts[#argmap2mup_opts + 1] = "-f"
+            argmap2mup_opts[#argmap2mup_opts + 1] = gdriveFolder
         end
         if format == "markdown" and block.attributes["tidy"] == "true" then
             -- convert and upload to google drive, and return a yaml

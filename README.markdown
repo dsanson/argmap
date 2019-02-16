@@ -344,7 +344,7 @@ $ cat example.yml | argmap2mup | jq
   "ideas": {
     "1": {
       "attr": {},
-      "title": "Brunellus is irrational\n",
+      "title": "Brunellus is irrational",
       ⋮
 }
 ```
@@ -382,6 +382,10 @@ This command implies `--upload`:
 $ cat example.yml | argmap2mup -g 1e4HAl1iHPKBiKZ_BI_yBw7rXYbuvMsC2
 1e4HAl1iHPKBiKZ_BI_yBw7rXYbuvMsC2
 ```
+`-f ID, --folder ID`:  upload to Google Drive folder with ID
+
+For example, I prefer to upload all of my automatically generated maps to a
+folder called `argmaps`.
 
 `p, --public`: Mark the uploaded file as shareable.
 
@@ -412,9 +416,10 @@ mup2argmap example.mup
 
 The following options are available:
 
-`-g ID, --gdrive_id ID`: read the file by Google Drive ID.
+`-g ID, --gdrive_id ID`: read the file with the specified Google Drive ID.
 
-This option overrides all other forms of input.
+This option takes precedence any files specified on the command line or
+anything piped to STDIN.
 
 `-e, --embed`: wrap output in a pandoc markdown code block with attributes,
 suitable for embedding.
@@ -487,10 +492,7 @@ output of `--includes` in your preamble:
 $ argmap2tikz -i
     \usepackage{tikz}
     \usetikzlibrary{graphs,graphdrawing}
-    \usegdlibrary{trees}
-    \usegdlibrary{layered}
-    \definecolor{green}{HTML}{339966} 
-    \usepackage{adjustbox}
+    ⋮
     \usepackage{varwidth}
     \newcommand{\argmapmaxnodewidth}{15em}
 ```
@@ -506,10 +508,7 @@ $ argmap2tikz -t
 $if(argmaps)$
     \usepackage{tikz}
     \usetikzlibrary{graphs,graphdrawing}
-    \usegdlibrary{trees}
-    \usegdlibrary{layered}
-    \definecolor{green}{HTML}{339966} 
-    \usepackage{adjustbox}
+    ⋮
     \usepackage{varwidth}
     \newcommand{\argmapmaxnodewidth}{15em}
 $endif$
@@ -523,6 +522,18 @@ $endif$
 `pandoc-argmap.lua` is a [pandoc lua
 filter](https://pandoc.org/lua-filters.html) for converting `YAML` argument
 maps embedded in a pandoc document, using `argmap2mup` and `argmap2tikz`.
+
+### Default Google Folder
+
+I put a line like this at the top of my personal copy of `pandoc-argmap.lua`:
+
+```{.lua}
+local gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
+
+```
+
+This tells pandoc to upload all the maps it generates to a specific folder on
+my Google Drive.
 
 ### Embedding Maps in Markdown
 
@@ -579,8 +590,8 @@ $ pandoc example.md -o example.pdf --lua-filter pandoc-argmap.lua --pdf-engine l
 ### Output
 
 With one exception, `pandoc-argmap.lua` replaces each embedded `YAML` map with
-a TikZ generated image of the map, linked to a generated MindMup map uploaded
-to Google Drive.
+a TikZ generated image of the map, generates a MindMup map and uploads it
+to Google Drive, and links the image to the MindMup url.
 
 Here is the exception: if your output format is `markdown` and the map has the
 attribute "tidy" set to "true",
