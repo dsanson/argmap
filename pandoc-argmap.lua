@@ -1,13 +1,5 @@
 -- a pandoc lua filter that replaces yaml encoded argument maps
 -- with tikz maps linked to generated mindmup maps.
---
--- TODO: document yaml format
--- TODO: document usage
--- TODO: convert (directly?) to svg instead of png
--- TODO: document required packages in pandoc template
--- TODO: document dependencies
--- TODO: put the images in a directory
--- TODO: delete old images that are no longer needed?
 
 local format = FORMAT 
 -- class that identifies a code block as an argument map
