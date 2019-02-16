@@ -215,6 +215,10 @@ colon ('`:`') after the claim:
     "Brunellus is a donkey.": 
 ```
 
+In practice, the implicit empty list notation is preferred, because it means
+you don't have to delete the braces before adding reasons in support of a
+claim.
+
 ### Keys and Quotation
 
 `YAML` allows just about any string to be a key, but you do
