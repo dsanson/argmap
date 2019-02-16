@@ -264,11 +264,23 @@ Multiline keys are also possible, but the format is a bit complicated
 ### Markdown Formatting
 
 Each claim key is processed by `pandoc`. This means that you should be able to get
-away with using simple markdown inside the claim keys. But keep in mind that
-MindMup offers very limited support for formatted text.
+away with using simple markdown inside the claim keys.
 
 ```{.yaml}
 "Brunellus is *probably* 90% H~2~O":
+```
+
+Keep in mind that MindMup offers very limited support for formatted text. So,
+for MindMup maps, formatting will be converted to `pandoc`'s "plain" output:
+
+```
+Brunellus is _probably_ 90% H₂O
+```
+
+For `TikZ` maps, formatting will be converted to latex:
+
+```{.latex}
+Brunellus is \emph{probably} 90\% H\textsubscript{2}O
 ```
 
 ### Notes, Labels, and Strength
