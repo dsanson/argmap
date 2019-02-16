@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 -- A pipe that reads mindmup `mup` files and outputs `yaml` argument maps.
 
---local pl = require'pl.import_into'()
+local pl = require'pl.import_into'()
 local lyaml   = require "lyaml"
 local json = require 'json'
 
@@ -68,18 +68,62 @@ function parse_reasons(reasons,note)
     return argmap
 end
 
--- function parse_options(a)
---     local flags,args = pl.app.parse_args(a)
---     return flags,args
--- end
+function parse_options(a)
+    local opts = {}
+    local flags,args = pl.app.parse_args(a,{g=true,gdrive_id=true})
+    opts["help"] = flags["h"] or flags["help"]
+    opts["wrap"] = flags["e"] or flags["embed"]
+    opts["gdrive_id"] = flags["g"]
+    if not opts["gdrive_id"] then
+        opts["gdrive_id"] = flags["gdrive_id"]
+    end
+    if #args > 0 then
+        opts["file"] = args[1]
+    end
+    return opts
+end
+
+function help()
+   return [[mup2argmap <options> <file>
+  -e, --embed:      wrap in code block for embedding in pandoc markdown 
+  -g, --gdrive_id:  parse mup file with corresponding Google Drive ID
+  -h:               show this help]]
+end
 
 function main_program()
-    -- local flags,args = parse_options
-    local input = io.read("*all")
-    local mup = json.decode(input)
-    local argmap = parse_claims(mup["ideas"],nil,nil)
-    local yml = lyaml.dump({argmap})
-    return yml
+    local opts = parse_options(args)
+    if opts["help"] then
+        return help()
+    else
+        local input = ""
+        if opts["gdrive_id"] then
+            local f = assert(io.popen("gdrive download --stdout --no-progress " .. " " .. opts["gdrive_id"])) 
+            input = f:read("*all")
+            f:close()
+        elseif opts["file"] then
+            local f = io.open(opts["file"],'r')
+            input = f:read("*all")
+            f:close()
+        else
+            input = io.read("*all")
+        end 
+        local mup = json.decode(input)
+        local argmap = parse_claims(mup["ideas"],nil,nil)
+        local name = mup["title"]
+        local yml = lyaml.dump({argmap})
+        if opts["wrap"] then
+            local attr = ""
+            if name then
+                attr = " name=\"" .. name .. "\""
+            end
+            if opts["gdrive_id"] then
+                attr = attr .. " gid=\"" .. opts["gdrive_id"] .. "\""
+            end
+            return "```{.argmap " .. attr .. "}\n" .. yml .. "```\n"
+        else
+            return yml
+        end
+    end
 end
 
 print(main_program())
