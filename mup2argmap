@@ -1,0 +1,85 @@
+#!/usr/bin/env lua
+-- A pipe that reads mindmup `mup` files and outputs `yaml` argument maps.
+
+local pl = require'pl.import_into'()
+local lyaml   = require "lyaml"
+local json = require 'json'
+
+function dig_in(table,fields)
+    local t = table
+    local result = true
+    for _,f in pairs(fields) do
+        if t[f] then
+            t = t[f]
+        else
+            result = false
+            break
+        end
+    end
+    if result then
+        return t
+    else
+        return nil
+    end
+end
+
+function parse_claims(claims,strength,label)
+    local argmap = {}
+    if strength then
+        argmap["strength"] = strength
+    end
+    if label then
+        argmap["label"] = label
+    end
+    for _,items in pairs(claims) do
+        local key = items["title"]
+        local styles = dig_in(items,{"attr","styleNames"})
+        if styles and styles[1] == "attr_implicit_claim" then
+            key = "-" .. key
+        end 
+        local note = dig_in(items,{"attr","note","text"})
+        local reasons = {}
+        if items["ideas"] then
+          reasons = parse_reasons(items["ideas"],note)
+        elseif note then
+          reasons = reasons["note"]
+        end
+        argmap[key] = reasons
+    end 
+    return argmap
+end
+
+function parse_reasons(reasons,note)
+    local argmap = {}
+    argmap["note"] = note
+    for index,items in pairs(reasons) do
+        local key = ""
+        local type = items["attr"]["group"]
+        if type == "opposing" then
+            key = "o" .. index
+        else
+            key = "r" .. index
+        end
+        local strength = dig_in(items, {"attr","parentConnector","width"})
+        local label = dig_in(items, {"attr","parentConnector","label"})
+        local claims = parse_claims(items["ideas"],strength,label)
+        argmap[key] = claims
+    end 
+    return argmap
+end
+
+function parse_options(a)
+    local flags,args = pl.app.parse_args(a)
+    return flags,args
+end
+
+function main_program()
+    -- local flags,args = parse_options
+    local input = io.read("*all")
+    local mup = json.decode(input)
+    local argmap = parse_claims(mup["ideas"],nil,nil)
+    local yml = lyaml.dump({argmap})
+    return yml
+end
+
+print(main_program())
