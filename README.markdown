@@ -632,8 +632,11 @@ TODO
         boxes immediately beneath them.
     -   [ ] the green and red edges should be curved.
 -   [ ] support for other formats?
+    -   [ ] import/export rationale?
+    -   [ ] DOT output? (See AIF's DOT format?)
 -   [ ] merge the three pipes into a single `argmap` command, using cli
     options to select input and output formats
 -   [x] mup2argmap should support fetching mup files from Google Drive and
     offer embeddable output (i.e., code block with both name and gid
     attributes)
+
