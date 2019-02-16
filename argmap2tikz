@@ -67,10 +67,6 @@ local styles = [=[
     implicit/.style={dashed}
 ]=]
 
-local function trim(s)
-   return (s:gsub("\n",""))
-end
-
 function pipe_in_out(cmd, s)
     -- a function for piping through unix commands
     local tmp = os.tmpname()
@@ -86,13 +82,27 @@ function pipe_in_out(cmd, s)
     return o
 end
 
+local function trim(s)
+   return (s:gsub("\n",""))
+end
+
 function markdown_to_latex(s)
     return trim(pipe_in_out("pandoc --wrap=none -t latex -f markdown", s))
 end
 
-function parse_ideas(t)
-    -- a function that parses "ideas", i.e., claims
-    -- initialize the output string
+-- TODO: enable parsing of notes, labels, and strength
+-- function parse_special(t,s)
+--     -- a function for parsing notes, labels, and strengths
+--     for i,v in pairs(t) do
+--         if string.match(i, "^" .. s .. "$") then
+--             return v
+--         end
+--     end
+--     return nil
+-- end
+
+function parse_claims(t)
+    -- a function that parses claims
     local o = ""
     indent = indent + 2
     for i,v in pairs(t) do
@@ -121,16 +131,6 @@ function parse_ideas(t)
     return o
 end
 
--- TODO: Enable notes. This is function is just copied from argmap2mup, and returns the content of a note.
--- function parse_notes(t)
---     for i,v in pairs(t) do
---         if string.match(i, "^note$") then
---             return v
---         end
---     end
---     return nil
--- end
-
 function parse_reasons(t,claimline)
     -- function that parses reasons for a claim and returns the appropriate tikz
     -- initialize output string
@@ -141,12 +141,12 @@ function parse_reasons(t,claimline)
         o = claimline .. ",\n"
     else
         for i,v in pairs(t) do
-            -- this for loop iterates over reasons: i is the label, and v is a list of claims
+            -- this for loop iterates over reasons: i is the identifier, and v is a list of claims
             if not string.match(i, "^note$") then
                 -- skip items labeled "note"
                 gn = gn + 1
                 local gid = tostring(gn)
-                -- if the label begins with '-' or 'o' then the reason is an objection
+                -- if the identifier begins with '-' or 'o' then the reason is an objection
                 local type = "supporting"
                 if string.match(i, "^[-o].*") then
                     type = "opposing"
@@ -157,11 +157,11 @@ function parse_reasons(t,claimline)
                 --     r2/""[supporting] // [ tree layout ] {
                 --        ...
                 --     }
-                -- note the recursive call to parse_ideas.
+                -- note the recursive call to parse_claims.
                 o = o .. claimline .. "\n" .. 
                     string.rep(" ",indent) .. "--[" .. type .. "edge]\n" ..
                     string.rep(" ",indent) .. "r" .. gid .. "/\"\" [" .. type .. "] // [ tree layout ] {\n"
-                    .. parse_ideas(v)
+                    .. parse_claims(v)
                     .. string.rep(" ",indent) .. "},\n"
             end
         end
@@ -174,7 +174,7 @@ function create_graph(t)
     -- parse the map and generate the tikz \graph
     local o = string.rep(" ",indent) .. "\\graph [layered layout, grow=down, tail anchor=center, head anchor=center]\n" ..
               string.rep(" ",indent) .. "{\n" ..
-              parse_ideas(t) ..
+              parse_claims(t) ..
               string.rep(" ",indent) .. "};\n"
     return o
 end
@@ -204,48 +204,52 @@ function create_texdocument(t)
 end
 
 function help()
-    local o = 
-[[argmap2tikz <options>
+    return [[argmap2tikz <options> <file>
    -s, --standalone: generate standalone tex file
    -i, --includes:   dump includes required for tex preamble
    -t, --template:   dump boilerplate for adding to preamble in a pandoc template
    -h, --help:       help]]
-   return(o)
 end
 
--- main program
-
--- parse cli options
-local flags,args = pl.app.parse_args()
-
-if flags["h"] or flags["help"] then
-    output = help()
-elseif flags["i"] or flags["includes"] then
-    output = includes
-elseif flags["t"] or flags["template"] then
-    output = [[$if(argmaps)$]] .. "\n" ..
-             includes .. "\n" ..
-             [[$endif$]]
-else
-   local yaml = ""
-   -- if #args > 0 then
-   --     -- read files from command line args
-   --     for i,n in ipairs(args) do
-   --         local f = io.open(n,'r')
-   --         yaml = yaml .. f:read("*all")
-   --         f:close()
-   --     end
-   -- else
-       -- read in stdin and parse yaml to lua table
-       yaml = io.read("*all")
-   -- end
-   local input = lyaml.load(yaml)
-   if flags["s"] or flags["standalone"] then
-       output = create_texdocument(input)
-   else
-       output = create_tikzpicture(input)
-   end
+function parse_options(a)
+    local opts = {}
+    local flags,args = pl.app.parse_args(a)
+    opts["standalone"] = flags["s"] or flags["standalone"]
+    opts["includes"] = flags["i"] or flags["includes"]
+    opts["template"] = flags["t"] or flags["template"]
+    opts["help"] = flags["h"] or flags["help"]
+    if #args > 0 then
+        opts["file"] = args[1]
+    end
+    return opts
 end
 
-print(output)
+function main()
+    local opts = parse_options(args)
+    if opts["help"] then
+        return help()
+    elseif opts["includes"] then
+        return includes
+    elseif opts["template"] then
+        return "$if(argmaps)$\n" ..
+                includes .. "\n" ..
+               "$endif$"
+    else
+        local input = ""
+        if opts["file"] then
+            local f = io.open(opts["file"],'r')
+            input = f:read("*all")
+            f:close()
+        else
+            input = io.read("*all")
+        end 
+        local argmap = lyaml.load(input)
+        if opts["standalone"] then
+           return create_texdocument(argmap)
+        else
+           return create_tikzpicture(argmap)
+        end
+    end
+end
 
+print(main())
