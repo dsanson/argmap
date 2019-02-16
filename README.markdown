@@ -52,7 +52,7 @@ your system.
 `pandoc-argmap.lua` depends on [`pandoc`](https://pandoc.org/), and on
 `argmap2lua` and `argmap2tikz`. It also depends on 
 [`pdf2svg`](http://www.cityinthesky.co.uk/opensource/pdf2svg/)
-for conversion to svg, andddd
+for conversion to svg, and
 [ImageMagick](https://www.imagemagick.org/)'s `convert` for conversion to png.
 
 ## Some Examples of Basic Usage
