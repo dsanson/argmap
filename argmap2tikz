@@ -67,6 +67,9 @@ local styles = [=[
     implicit/.style={dashed}
 ]=]
 
+local function trim(s)
+   return (s:gsub("\n",""))
+end
 
 function pipe_in_out(cmd, s)
     -- a function for piping through unix commands
@@ -84,7 +87,7 @@ function pipe_in_out(cmd, s)
 end
 
 function markdown_to_latex(s)
-    return pipe_in_out("pandoc --wrap=none -t latex -f markdown", s)
+    return trim(pipe_in_out("pandoc --wrap=none -t latex -f markdown", s))
 end
 
 function parse_ideas(t)
