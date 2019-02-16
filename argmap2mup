@@ -4,8 +4,6 @@ local pl = require'pl.import_into'()
 local lyaml   = require "lyaml"
 local json = require 'json'
 
--- set this to the google ID of the default folder to upload to
-local gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
 
 -- initialize the output map
 local output = { ["ideas"] = {}}
@@ -14,6 +12,7 @@ local gn = 0
 
 -- default options
 local gdrive_id = nil
+local gdriveFolder = nil
 local name = nil
 local upload = false
 local public = "" 
@@ -522,14 +521,14 @@ end
 
 function parse_options(a)
     local opts = {}
-    local flags,args = pl.app.parse_args(args,{g=true, gdrive_id=true, n=true, name=true, f=true, folder=true })
+    local flags,args = pl.app.parse_args(a,{g=true, gdrive_id=true, n=true, name=true, f=true, folder=true })
     opts["upload"] = flags["u"] or flags["upload"] or
                      flags["p"] or flags["public"] or 
                      flags["g"] or flags["gdrive"] or
                      flags["f"] or flags["folder"]
     opts["help"]   = flags["h"] or flags["help"]
     if flags["p"] or flags["public"] then
-        opts["public"] = "--public"
+        opts["public"] = "--share"
     else
         opts["public"] = ""
     end
@@ -552,6 +551,7 @@ function parse_options(a)
 end
 
 function main()
+    print(args)
     local opts = parse_options(args)
     if opts["help"] then
         return help()
