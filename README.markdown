@@ -169,18 +169,17 @@ choose in unpredictable.
 Instead, you need to ensure that the keys are distinct:
 
 ```{.yaml}
-"Brunellus is a donkey":
+"Brunellus is irrational.":
   reason1: {}
-"All donkeys are irrational":
-  reason1: {}
+  reason2: {}
 ```
 
 Reasons for distinct claims can have the same identifier. So this is okay:
 
 ```{.yaml}
-"Brunellus is irrational": 
+"Brunellus is a donkey.": 
   reason1: {}
-"Brunellus
+"All donkeys are irrational.":
   reason1: {}
 ```
 
@@ -195,7 +194,19 @@ must have distinct keys. So don't write something like this:
 ```
 
 Since the key is the content of the claim, this restriction makes
-sense.
+sense: you would not want to represent the same premise twice as part of a
+single reason. But, of course, the same premise can occur as part of two
+distinct reasons:
+
+```{.yaml}
+"Brunellus is irrational":
+  r1:
+    "Brunellus is a donkey.": {}
+    "All donkeys are irrational.": {}
+  r2:
+    "Brunellus is a donkey.": {}
+    "Most donkeys I've met have been irrational.": {}
+```
 
 ### Empty Lists 
 
