@@ -4,6 +4,9 @@ local pl = require'pl.import_into'()
 local lyaml   = require "lyaml"
 local json = require 'json'
 
+-- set this to the google ID of the default folder to upload to
+local gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
+
 -- initialize the output map
 local output = { ["ideas"] = {}}
 -- initialize a global counter for providing unique ids
@@ -400,10 +403,6 @@ theme:
 ...
 ]=])
 
-local function trim(s)
-   return (s:gsub("\n",""))
-end
-
 function pipe_in_out(cmd, s)
     -- a function for piping through unix commands
     local tmp = os.tmpname()
@@ -419,8 +418,23 @@ function pipe_in_out(cmd, s)
     return o
 end
 
+local function trim(s)
+    -- trim trailing newlines
+    return (s:gsub("\n",""))
+end
+
 function markdown_to_plain(s)
     return trim(pipe_in_out("pandoc --wrap=none -t plain -f markdown", s))
+end
+
+function parse_special(t,s)
+    -- a function for parsing notes, labels, and strengths
+    for i,v in pairs(t) do
+        if string.match(i, "^" .. s .. "$") then
+            return v
+        end
+    end
+    return nil
 end
 
 function parse_ideas(t)
@@ -450,8 +464,9 @@ function parse_ideas(t)
                 }
             end
             claim = markdown_to_plain(claim)
-            local note = parse_notes(v) 
+            local note = parse_special(v,"note")
             if note then
+                note = markdown_to_plain(note)
                 gn = gn + 1
                 attr["note"] = {
                     ["index"] = gn,
@@ -467,24 +482,6 @@ function parse_ideas(t)
         end
     end
     return o
-end
-
-function parse_notes(t)
-    for i,v in pairs(t) do
-        if string.match(i, "^note$") then
-            return markdown_to_plain(v)
-        end
-    end
-    return nil
-end
-
-function parse_special(t,s)
-    for i,v in pairs(t) do
-        if string.match(i, "^" .. s .. "$") then
-            return v
-        end
-    end
-    return nil
 end
 
 function parse_reasons(t)
@@ -513,75 +510,94 @@ function parse_reasons(t)
     return o
 end
 
--- main program
-
--- parse cli options
-
-local flags,args = pl.app.parse_args(args,{g=true, gdrive_id=true, n=true, name=true })
-
-upload = flags["u"] or flags["upload"] or flags["p"] or flags["public"] or flags["g"] or flags["gdrive"]
-if flags["g"] then
-    gdrive_id = flags["g"]
-end
-if flags["gdrive_id"] then
-    gdrive_id = flags["gdrive_id"]
-end
-if flags["n"] then
-    name = flags["n"]
-end
-if flags["name"] then
-    name = flags["name"]
-end
-if flags["p"] then
-    public = "--share"
-end
-if flags["public"] then
-    public = "--share"
-end
-if flags["h"] or flags["help"] then
-    output = [[
-argmap2mup <options>
+function help()
+   return [[argmap2mup <options> <file>
    -u, --upload           :  upload to Google Drive
    -g ID, --gdrive_id ID  :  update file with ID on Google Drive
+   -f ID, --folder ID     :  upload to Google Drive folder with ID
    -p, --public           :  mark uploaded file as public
    -n NAME, --name NAME   :  set the name of the map to NAME        
    -h, --help]]
-else
-    local yaml = ""
-    -- if #args > 0 then
-    --     -- read files from command line args
-    --     for i,n in ipairs(args) do
-    --         local f = io.open(n,'r')
-    --         yaml = yaml .. f:read("*all")
-    --         f:close()
-    --     end
-    -- else
-       -- read in stdin and parse yaml to lua table
-    yaml = io.read("*all")
-    -- end
-    local input = lyaml.load(yaml)
+end
 
-    output = template
-
-    output["ideas"] = parse_ideas(input)
-    --pl.pretty.dump(output)
-    output["title"] = name
-
-    local mup = json.encode(output)
-
-    if upload and gdrive_id then
-        pipe_in_out("gdrive update " .. " --no-progress --name \"" .. name .. "\" --mime \"application/vnd.mindmup\" \"" .. gdrive_id .. "\"", mup)
-        output = gdrive_id
-    elseif upload then
-        gdriveFolder = "11w-foIj3p_FWSUROEX0VJg1KsslhJR0m"
-        -- gdrive_id = pipe_in_out("gdrive upload --delete --share --no-progress -p " .. gdriveFolder ..
-        --                " --name " .. name .. " --mime \"application/vnd.mindmup\"", mup)
-        local gdriveoutput = pipe_in_out("gdrive upload --delete " .. public .. " --no-progress -p \"" .. gdriveFolder ..
-                        "\" --name \"" .. name .. "\" --mime \"application/vnd.mindmup\"",mup)
-        gdrive_id = string.match(gdriveoutput, "Uploaded ([^%s]*) at")
-        output = gdrive_id
+function parse_options(a)
+    local opts = {}
+    local flags,args = pl.app.parse_args(args,{g=true, gdrive_id=true, n=true, name=true, f=true, folder=true })
+    opts["upload"] = flags["u"] or flags["upload"] or
+                     flags["p"] or flags["public"] or 
+                     flags["g"] or flags["gdrive"] or
+                     flags["f"] or flags["folder"]
+    opts["help"]   = flags["h"] or flags["help"]
+    if flags["p"] or flags["public"] then
+        opts["public"] = "--public"
     else
-        output = mup
+        opts["public"] = ""
+    end
+    opts["gdrive_id"] = flags["g"]
+    if not opts["gdrive_id"] then
+        opts["gdrive_id"] = flags["gdrive_id"]
+    end
+    gdriveFolder = flags["f"]
+    if not gdriveFolder then
+        gdriveFolder = flags["folder"]
+    end
+    name = flags["n"]
+    if not name then
+        name = flags["name"]
+    end
+    if #args > 0 then
+        opts["file"] = args[1]
+    end
+    return opts
+end
+
+function main()
+    local opts = parse_options(args)
+    if opts["help"] then
+        return help()
+    else
+        local input = ""
+        if opts["file"] then
+            local f = io.open(opts["file"],'r')
+            input = f:read("*all")
+            f:close()
+        else
+            input = io.read("*all")
+        end 
+        local argmap = lyaml.load(input)
+        output = template
+        output["ideas"] = parse_ideas(argmap)
+        output["title"] = name
+        local mup = json.encode(output)
+
+        if opts["upload"] and opts["gdrive_id"] then
+            pipe_in_out("gdrive update " .. 
+                        "--no-progress " ..
+                        "--name \"" .. name .. "\" " ..
+                        "--mime \"application/vnd.mindmup\" ..\" " ..
+                        opts["gdrive_id"] .. "\"", 
+                        mup)
+            return opts["gdrive_id"]
+        elseif opts["upload"] then
+            if gdriveFolder then
+                folderopt = "-p \"" .. gdriveFolder .. "\" "
+            else
+                gdriveFolder = nil
+            end
+            local gdriveoutput = pipe_in_out(
+               "gdrive upload --delete " ..
+                opts["public"] .. " " ..
+                "--no-progress " ..
+                folderopt ..
+                "--name \"" .. name .. "\" " ..
+                "--mime \"application/vnd.mindmup\"",
+                mup)
+            local gdrive_id = string.match(gdriveoutput, "Uploaded ([^%s]*) at")
+            return gdrive_id
+        else
+            return mup
+        end
     end
 end
-print(output)
+
+print(main())
