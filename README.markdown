@@ -287,7 +287,7 @@ Brunellus is \emph{probably} 90\% H\textsubscript{2}O
 
 ### Notes, Labels, and Strength
 
-(Currently, notes, labels, and strength are only supported for MindMup input
+(Currently, notes and strength are only supported for MindMup input
 and output, and do not appear in TikZ output.)
 
 You can attach one *note* to any claim (if you attach more than one note, only
@@ -627,7 +627,9 @@ TODO
 -   [ ] add sane syntax checking: right now, if you mess up the syntax of your
     map, everything breaks.
 -   [ ] improve the tikz styling of maps.
-    -   [ ] support for notes, labels, and strength in tikz output
+    -   [x] support for labels in tikz output
+    -   [ ] support for strength in tikz output
+    -   [ ] support for notes in tikz output
     -   [ ] the green and red "umbrellas" should only be as wide as the claim
         boxes immediately beneath them.
     -   [ ] the green and red edges should be curved.

@@ -3,8 +3,6 @@
 -- a tikz argument map, styled to mimic the argument maps
 -- on mindmup.
 --
--- TODO: document
--- TODO: document dependencies: pl lyaml
 -- TODO: better way to lay out the graph?
 -- TODO:   covering line width
 -- TODO:   top align claims
@@ -28,6 +26,7 @@ local indent = 0
 local includes = [[
     \usepackage{tikz}
     \usetikzlibrary{graphs,graphdrawing}
+    \usetikzlibrary{quotes}
     \usegdlibrary{trees}
     \usegdlibrary{layered}
     \definecolor{green}{HTML}{339966} 
@@ -90,16 +89,16 @@ function markdown_to_latex(s)
     return trim(pipe_in_out("pandoc --wrap=none -t latex -f markdown", s))
 end
 
--- TODO: enable parsing of notes, labels, and strength
--- function parse_special(t,s)
---     -- a function for parsing notes, labels, and strengths
---     for i,v in pairs(t) do
---         if string.match(i, "^" .. s .. "$") then
---             return v
---         end
---     end
---     return nil
--- end
+-- TODO: enable parsing of notes and strength
+function parse_special(t,s)
+    -- a function for parsing notes, labels, and strengths
+    for i,v in pairs(t) do
+        if string.match(i, "^" .. s .. "$") then
+            return v
+        end
+    end
+    return nil
+end
 
 function parse_claims(t)
     -- a function that parses claims
@@ -121,6 +120,11 @@ function parse_claims(t)
                 attr = attr .. ", implicit"
             end
             claim = markdown_to_latex(claim)
+            local note = parse_special(v,"note")
+            if note then
+                note = trim(markdown_to_latex(note))
+                -- TODO: attach note to claim.
+            end
             -- construct the claim in tikz, e.g,: c1/"Eating meat is morally acceptable"[claim, implicit]
             local claimline = string.rep(" ",indent) .. "c" .. gid .. "/\"" .. claim .. "\"[" .. attr .. "]"
             -- parse the reasons for the claim, and add the result to output.
@@ -151,6 +155,14 @@ function parse_reasons(t,claimline)
                 if string.match(i, "^[-o].*") then
                     type = "opposing"
                 end
+                local label = parse_special(v,"label")
+                local labelnode = ""
+                if label then
+                    label = trim(markdown_to_latex(label))
+                    label = string.gsub(label, ":", "{:}")
+                    label = "\"{\\footnotesize " .. label .. "}\", "
+                end
+                local strength = parse_special(v,"strength")
                 -- construct the tikz, e.g.,
                 --   c1/"Eating meat is morally acceptable"[claim, implicit]
                 --     --[supportingedge]
@@ -159,7 +171,7 @@ function parse_reasons(t,claimline)
                 --     }
                 -- note the recursive call to parse_claims.
                 o = o .. claimline .. "\n" .. 
-                    string.rep(" ",indent) .. "--[" .. type .. "edge]\n" ..
+                    string.rep(" ",indent) .. "--[" .. label .. type .. "edge] " ..
                     string.rep(" ",indent) .. "r" .. gid .. "/\"\" [" .. type .. "] // [ tree layout ] {\n"
                     .. parse_claims(v)
                     .. string.rep(" ",indent) .. "},\n"
@@ -172,7 +184,12 @@ end
 
 function create_graph(t)
     -- parse the map and generate the tikz \graph
-    local o = string.rep(" ",indent) .. "\\graph [layered layout, grow=down, tail anchor=center, head anchor=center]\n" ..
+    local o = string.rep(" ",indent) .. "\\graph [layered layout, " .. 
+                                                  "grow down, " ..
+                                                  "level distance=5em, " ..
+                                                  "tail anchor=center, " ..
+                                                  "edge quotes={fill=yellow!25,inner sep=3pt}, " ..
+                                                  "head anchor=center]\n" ..
               string.rep(" ",indent) .. "{\n" ..
               parse_claims(t) ..
               string.rep(" ",indent) .. "};\n"
