@@ -609,15 +609,15 @@ paragraph containing the generated image, linked to the mindmup file.
 
 ## TODO
 
--   [] add sane syntax checking: right now, if you mess up the syntax of your
+-   [ ] add sane syntax checking: right now, if you mess up the syntax of your
     map, everything breaks.
--   [] improve the tikz styling of maps.
-    -   [] support for notes, labels, and strength in tikz output
-    -   [] the green and red "umbrellas" should only be as wide as the claim
+-   [ ] improve the tikz styling of maps.
+    -   [ ] support for notes, labels, and strength in tikz output
+    -   [ ] the green and red "umbrellas" should only be as wide as the claim
         boxes immediately beneath them.
-    -   [] the green and red edges should be curved.
--   [] support for other formats?
--   [] merge the three pipes into a single `argmap` command, using cli options
+    -   [ ] the green and red edges should be curved.
+-   [ ] support for other formats?
+-   [ ] merge the three pipes into a single `argmap` command, using cli options
     to select input and output formats
 -   [x] mup2argmap should support fetching mup files from Google Drive and 
     offer embeddable output (i.e., code block with both name and gid attributes)
