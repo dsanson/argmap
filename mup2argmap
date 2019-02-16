@@ -68,6 +68,13 @@ function parse_reasons(reasons,note)
     return argmap
 end
 
+function help()
+   return [[mup2argmap <options> <file>
+  -e, --embed:      wrap in code block for embedding in pandoc markdown 
+  -g, --gdrive_id:  parse mup file with corresponding Google Drive ID
+  -h:               show this help]]
+end
+
 function parse_options(a)
     local opts = {}
     local flags,args = pl.app.parse_args(a,{g=true,gdrive_id=true})
@@ -83,14 +90,7 @@ function parse_options(a)
     return opts
 end
 
-function help()
-   return [[mup2argmap <options> <file>
-  -e, --embed:      wrap in code block for embedding in pandoc markdown 
-  -g, --gdrive_id:  parse mup file with corresponding Google Drive ID
-  -h:               show this help]]
-end
-
-function main_program()
+function main()
     local opts = parse_options(args)
     if opts["help"] then
         return help()
@@ -126,4 +126,4 @@ function main_program()
     end
 end
 
-print(main_program())
+print(main())
