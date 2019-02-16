@@ -587,9 +587,17 @@ generates individual pdf files for each map, and then
 converts them to png using ImageMagick's `convert` command. It replaces the code block with a
 paragraph containing the generated image, linked to the mindmup file.
 
+## TODO
 
-
-
+-   [] improve the tikz styling of maps.
+    -   [] the green and red "umbrellas" should only be as wide as the claim
+        boxes immediately beneath them.
+    -   [] the green and red edges should be curved.
+-   [] support for other formats?
+-   [] merge the three pipes into a single `argmap` command, using cli options
+    to select input and output formats
+-   [] mup2argmap should support fetching mup files from Google Drive and 
+    offer embeddable output (i.e., code block with both name and gid attributes)
 
 
 
