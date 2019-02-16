@@ -59,10 +59,10 @@ local styles = [=[
        execute at begin node={\begin{varwidth}{\argmapmaxnodewidth}},
        execute at end node={\end{varwidth}}
     },
-    supporting/.style={umbrella={green,very thick}},
-    supportingedge/.style={green,very thick},
-    opposing/.style={umbrella={red, very thick}},
-    opposingedge/.style={red,very thick},
+    supporting/.style args={#1}{umbrella={green,#1}},
+    supportingedge/.style={green},
+    opposing/.style args={#1}{umbrella={red,#1}},
+    opposingedge/.style={red},
     implicit/.style={dashed}
 ]=]
 
@@ -89,7 +89,7 @@ function markdown_to_latex(s)
     return trim(pipe_in_out("pandoc --wrap=none -t latex -f markdown", s))
 end
 
--- TODO: enable parsing of notes and strength
+-- TODO: enable parsing of notes 
 function parse_special(t,s)
     -- a function for parsing notes, labels, and strengths
     for i,v in pairs(t) do
@@ -163,6 +163,20 @@ function parse_reasons(t,claimline)
                     label = "\"{\\footnotesize " .. label .. "}\", "
                 end
                 local strength = parse_special(v,"strength")
+                local width = "line width=1.2pt" -- "very thick"
+                if strength == 1 then
+                    width = "line width=0.6pt"
+                elseif strength == 2 then
+                    width = "line width=0.8pt"
+                elseif strength == 3 then
+                    width = "line width=1.2pt" -- "very thick"
+                elseif strength == 4 then
+                    width = "line width=1.6pt"
+                elseif strength == 4 then
+                    width = "line width=2pt"
+                end
+
+                    
                 -- construct the tikz, e.g.,
                 --   c1/"Eating meat is morally acceptable"[claim, implicit]
                 --     --[supportingedge]
@@ -171,8 +185,8 @@ function parse_reasons(t,claimline)
                 --     }
                 -- note the recursive call to parse_claims.
                 o = o .. claimline .. "\n" .. 
-                    string.rep(" ",indent) .. "--[" .. label .. type .. "edge] " ..
-                    string.rep(" ",indent) .. "r" .. gid .. "/\"\" [" .. type .. "] // [ tree layout ] {\n"
+                    string.rep(" ",indent) .. "--[" .. width .. ", " .. label .. type .. "edge] " ..
+                    string.rep(" ",indent) .. "r" .. gid .. "/\"\" [" .. type .. "={" .. width .. "}] // [ tree layout ] {\n"
                     .. parse_claims(v)
                     .. string.rep(" ",indent) .. "},\n"
             end
