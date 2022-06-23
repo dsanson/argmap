@@ -1,0 +1,24 @@
+name: argmaps
+channels:
+  - anaconda-platform
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=4.5=1_gnu
+  - ca-certificates=2022.4.26=h06a4308_0
+  - icu=68.1=h2531618_0
+  - libgcc-ng=9.3.0=h5101ec6_17
+  - libgomp=9.3.0=h5101ec6_17
+  - libstdcxx-ng=9.3.0=hd4cf53a_17
+  - libuv=1.40.0=h7b6447c_0
+  - lua=5.3.4=h7b6447c_0
+  - luarocks=3.7.0=lua53h06a4308_0
+  - ncurses=6.3=h7f8727e_2
+  - nodejs=16.13.1=hb931c9a_0
+  - openssl=1.1.1n=h7f8727e_0
+  - readline=7.0=h7b6447c_5
+  - unzip=6.0=0
+  - zlib=1.2.12=h7f8727e_2
+prefix: /opt/miniconda3/envs/argmaps
