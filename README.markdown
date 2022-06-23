@@ -1,6 +1,8 @@
 Argument Maps in YAML
 =====================
 
+See [NEWS.md](NEWS.md) for change notes.
+
 [![](examples/2cc90b7c54f340b9e4589f2c1b5a26589a5f2653.png)](https://drive.mindmup.com/map/18asUocP9fUtPbA8h4-qtTTfem0bxGunB)
 
 This repository contains some tools for working with argument maps written in
@@ -24,12 +26,17 @@ Mode](https://www.mindmup.com/tutorials/argument-visualization.html).
 Installation
 ------------
 
-Place `argmap2mup`, `argmap2tikz`, and `mup2argmap` somewhere in your path.
+Place `argmap2mup`, `argmap2tikz`, and `mup2argmap` somewhere in your path e.g. ~/bin.
+
 Place `pandoc-argmap.lua` in the `filters` folder inside your pandoc data
 directory, e.g., `$HOME/.pandoc/filters/pandoc-argmap.lua`.
 
 Dependencies
 ------------
+
+Lua: using Lua version 5.3.4
+
+See environment.yml for other dependencies and version numbers.
 
 `argmap2mup`, `argmap2tikz`, and `mup2argmap` require
 [penlight](https://github.com/stevedonovan/Penlight) (for command line option
@@ -632,6 +639,19 @@ generates individual pdf files for each map, and then converts them to png
 using ImageMagick's `convert` command. It replaces the code block with a
 paragraph containing the generated image, linked to the mindmup file.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+# Fork details
+
+Fork of https://github.com/dsanson/argmap
+
+Installed with lua 5.3.4
+
+Fixed some issues (potentially caused by different lua version).
+
+
 TODO
 ----
 
@@ -652,4 +672,3 @@ TODO
 -   [x] mup2argmap should support fetching mup files from Google Drive and
     offer embeddable output (i.e., code block with both name and gid
     attributes)
-

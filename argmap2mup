@@ -551,8 +551,8 @@ function parse_options(a)
 end
 
 function main()
-    print(args)
-    local opts = parse_options(args)
+    --print(args)
+    local opts = parse_options(arg)
     if opts["help"] then
         return help()
     else
@@ -569,7 +569,8 @@ function main()
         output["ideas"] = parse_claims(argmap)
         output["title"] = name
         local mup = json.encode(output)
-
+        
+        local folderopt = ""
         if opts["upload"] and opts["gdrive_id"] then
             pipe_in_out("gdrive update " .. 
                         "--no-progress " ..
