@@ -5,6 +5,8 @@ See [NEWS.md](NEWS.md) for change notes.
 
 [![](examples/2cc90b7c54f340b9e4589f2c1b5a26589a5f2653.png)](https://drive.mindmup.com/map/18asUocP9fUtPbA8h4-qtTTfem0bxGunB)
 
+This project is not being actively maintained by me at the moment. If you are interested in it, you might consider Michael Hayes's fork: <https://github.com/s6mike/argmap>
+
 This repository contains some tools for working with argument maps written in
 a relatively simple [`YAML`](https://yaml.org/) format, described below. For
 example, the map above was generated from this `YAML`:
