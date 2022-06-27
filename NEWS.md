@@ -1,6 +1,9 @@
 Argmap Project News
 ===================
 
+# argmap 1.1.3
+- Update [README](README.markdown).
+
 # argmap 1.1.2
 - Update [README](README.markdown).
 

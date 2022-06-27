@@ -5,11 +5,7 @@ Argument Maps in YAML
 
 This project is not being actively maintained by me at the moment. If you are interested in it, you might consider Michael Hayes's fork: https://github.com/s6mike/argmap.
 
-His fixes and improvements are on two branches:
-- argmap2mup-fix: fixes some issues in this file only, with corresponding documentation updates.
-- bugfixes: more fixes, plus much broader changes, including formatting, bash aliases etc.
-
-See relevant [NEWS.md](NEWS.md) for change notes.
+Some of his fixes and improvements are on branches, see relevant [NEWS.md](NEWS.md) for change notes.
 
 -------------
 
