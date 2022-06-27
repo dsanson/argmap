@@ -1,6 +1,9 @@
 Argmap Project News
 ===================
 
+# argmap 1.1.2
+- Update [README](README.markdown).
+
 # argmap 1.1.1
 - Updated my changes to start from 1.1.0 for continuity from dsanson's original repo.
 
@@ -10,11 +13,16 @@ Argmap Project News
     - Close #1 output file start with 'nil'
     - Close #2 gdrive upload fails
 - Update license and readme.
-- Add conda export: environment.yml, .gitignore and this NEWS.md file.
+- Add .gitignore, conda export: environment.yml
+
+# argmap 1.0.2
+- Update [README](README.markdown).
+
+# argmap 1.0.1
+- Update [README](README.markdown), [license](LICENSE).
+- Add this NEWS.md file.
 
 # argmap 1.0.0
 Original https://github.com/dsanson/argmap
 
-Uses Semantic Versioning: http://semver.org/
-
-
+Uses Semantic Versioning: http://semver.org/ and [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
