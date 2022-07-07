@@ -1,6 +1,10 @@
 Argmap Project News
 ===================
 
+# argmap 1.1.4
+- Rename this file to docs/CHANGELOG.md
+- Refined conda install environment.
+
 # argmap 1.1.3
 - Update [README](README.markdown).
 
