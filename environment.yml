@@ -1,24 +1,29 @@
 name: argmaps
 channels:
-  - anaconda-platform
   - anaconda
   - conda-forge
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=main
-  - _openmp_mutex=4.5=1_gnu
+  - _openmp_mutex=5.1=1_gnu
   - ca-certificates=2022.4.26=h06a4308_0
   - icu=68.1=h2531618_0
-  - libgcc-ng=9.3.0=h5101ec6_17
-  - libgomp=9.3.0=h5101ec6_17
-  - libstdcxx-ng=9.3.0=hd4cf53a_17
+  - libgcc-ng=11.2.0=h1234567_1
+  - libgomp=11.2.0=h1234567_1
+  - libstdcxx-ng=11.2.0=h1234567_1
   - libuv=1.40.0=h7b6447c_0
   - lua=5.3.4=h7b6447c_0
   - luarocks=3.7.0=lua53h06a4308_0
   - ncurses=6.3=h7f8727e_2
   - nodejs=16.13.1=hb931c9a_0
-  - openssl=1.1.1n=h7f8727e_0
+  - openssl=1.1.1o=h7f8727e_0
+  - pandoc=2.12=h06a4308_0
   - readline=7.0=h7b6447c_5
-  - unzip=6.0=0
+  - unzip=6.0=h7f98852_3
+  - yaml=0.2.5=h7b6447c_0
   - zlib=1.2.12=h7f8727e_2
+variables:
+  LUA_CPATH: /home/s6mike/git_projects/argmap/lua_modules/lib/lua/5.3/?.so;/opt/miniconda3/envs/argmaps/lib/lua/5.3/?.so;/opt/miniconda3/envs/argmaps/share/lua/5.3/lua_modules/lib/lua/5.3/?.so;/opt/miniconda3/envs/argmaps/lib/lua/5.3/loadall.so;./?.so;/home/s6mike/.luarocks/lib/lua/5.3/?.so
+  LUA_PATH: /home/s6mike/git_projects/argmap/lua_modules/share/lua/5.3/?.lua;/home/s6mike/git_projects/argmap/lua_modules/share/lua/5.3/?/init.lua;/opt/miniconda3/envs/argmaps/share/lua/5.3/?.lua;/opt/miniconda3/envs/argmaps/share/lua/5.3/?/init.lua;/opt/miniconda3/envs/argmaps/share/lua/5.3/lua_modules/share/lua/5.3/?.lua;/opt/miniconda3/envs/argmaps/share/lua/5.3/lua_modules/share/lua/5.3/?/init.lua;/opt/miniconda3/envs/argmaps/lib/lua/5.3/?.lua;/opt/miniconda3/envs/argmaps/lib/lua/5.3/?/init.lua;./?.lua;./?/init.lua;/home/s6mike/.luarocks/share/lua/5.3/?.lua;/home/s6mike/.luarocks/share/lua/5.3/?/init.lua
+  PATH: /home/s6mike/git_projects/argmap/lua_modules/bin:/home/s6mike/.luarocks/bin:/home/s6mike/bin:/opt/miniconda3/envs/argmaps/bin:/opt/miniconda3/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
 prefix: /opt/miniconda3/envs/argmaps
