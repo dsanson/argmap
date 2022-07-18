@@ -20,12 +20,12 @@ local function argmap2image(src, filetype, outfile)
     local o = nil
     local tmp = os.tmpname()
     local tmpdir = string.match(tmp, "^(.*[\\/])") or "."
-    local opts = "-s"
+    local opts = { "-s" }
     if format == "latex" or format == "beamer" then
         -- for any format other than raw tikz we need a standalone tex file
-        opts = ""
+        opts = {}
     end
-    local tex = pandoc.pipe("argmap2tikz",{opts}, src) -- convert map to standalone tex
+    local tex = pandoc.pipe("argmap2tikz", opts, src) -- convert map to standalone tex
     if format == 'latex' or format == 'beamer' then
         -- for latex, just return raw tex
         o = tex
